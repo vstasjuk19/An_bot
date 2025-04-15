@@ -10,8 +10,13 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
 # Підключення до Google Sheets
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+import json
+import os
+
+credentials_json = os.environ["GOOGLE_CREDENTIALS"]
+credentials_dict = json.loads(credentials_json)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
 client = gspread.authorize(creds)
 
 # Категорії таблиці на окремих аркушах
