@@ -12,7 +12,7 @@ ADMIN_ID = int(os.getenv("ADMIN_ID"))
 # Підключення до Google Sheets
 import json
 import os
-
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 credentials_json = os.environ["GOOGLE_CREDENTIALS"]
 credentials_dict = json.loads(credentials_json)
 creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
