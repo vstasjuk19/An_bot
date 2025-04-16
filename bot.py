@@ -19,16 +19,16 @@ if not os.getenv("GOOGLE_CREDENTIALS"):
     raise ValueError("GOOGLE_CREDENTIALS не встановлено!")
 
 # --- Підключення до Google Sheets ---
+
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-# Записуємо JSON у файл, якщо він ще не створений
-if not os.path.exists("credentials.json"):
-    credentials_raw = os.environ["GOOGLE_CREDENTIALS"]
-    credentials_dict = json.loads(credentials_raw)  # Розпарсимо спочатку
-    with open("credentials.json", "w") as f:
-        json.dump(credentials_dict, f)  # Запишемо у валідному форматі
+# Отримуємо JSON як рядок і перетворюємо \n
+raw_json = os.environ["GOOGLE_CREDENTIALS"]
+fixed_json = raw_json.replace("\\n", "\n")
+credentials_dict = json.loads(fixed_json)
 
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+# Авторизація
+creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 client = gspread.authorize(creds)
 
 # --- Категорії ---
