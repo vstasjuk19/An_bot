@@ -39,6 +39,15 @@ category_sheets = {
 
 user_states = {}
 
+async def debug(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        spreadsheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk")
+        worksheets = spreadsheet.worksheets()
+        sheet_names = [ws.title for ws in worksheets]
+        await update.message.reply_text("Аркуші, які я бачу:\n" + "\n".join(sheet_names))
+    except Exception as e:
+        await update.message.reply_text(f"Помилка підключення до Google Sheets:\n{e}")
+
 def load_products(sheet_name):
     try:
         sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet(sheet_name)
@@ -129,3 +138,4 @@ if __name__ == '__main__':
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CallbackQueryHandler(button))
     app.run_polling()
+    app.add_handler(CommandHandler("debug", debug))
