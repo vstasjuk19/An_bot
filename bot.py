@@ -15,18 +15,11 @@ import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# Скоупи доступу
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-# Завантаження з ENV
 credentials_json = os.environ["GOOGLE_CREDENTIALS"]
 credentials_dict = json.loads(credentials_json)
 
-# Обережна заміна переносів, якщо потрібно
-if isinstance(credentials_dict.get("private_key"), str) and "\\n" in credentials_dict["private_key"]:
-    credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n", "\n")
-
-# Авторизація
 creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 client = gspread.authorize(creds)
 
