@@ -1,16 +1,16 @@
+
 import logging
 import os
 import json
-import re
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 
+# --- Змінні середовища ---
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
-# Перевірка обов'язкових змінних середовища
 if not BOT_TOKEN:
     raise ValueError("BOT_TOKEN не встановлено в середовищі!")
 if not ADMIN_ID:
@@ -18,24 +18,19 @@ if not ADMIN_ID:
 if not os.getenv("GOOGLE_CREDENTIALS"):
     raise ValueError("GOOGLE_CREDENTIALS не встановлено!")
 
-# Підключення до Google Sheets
-
+# --- Підключення до Google Sheets ---
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-# Отримуємо JSON як текст
-raw_json = os.getenv("GOOGLE_CREDENTIALS")
+# Записуємо JSON у файл, якщо він ще не створений
+if not os.path.exists("credentials.json"):
+    with open("credentials.json", "w") as f:
+        fixed_json = os.environ["GOOGLE_CREDENTIALS"].replace('\\n', '\n')
+        f.write(fixed_json)
 
-# Перетворюємо \\n на справжні \n
-fixed_json = raw_json.replace('\\n', '\n')
-
-# Завантажуємо словник з JSON
-credentials_dict = json.loads(fixed_json)
-
-# Авторизація
-creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
 client = gspread.authorize(creds)
 
-# Категорії таблиці на окремих аркушах
+# --- Категорії ---
 category_sheets = {
     "Чоловічі": "Men",
     "Жіночі": "Women",
@@ -65,6 +60,7 @@ def load_products(sheet_name):
 main_menu = [["Каталог"], ["Наші контакти"], ["Зв'язатися з нами"]]
 catalog_menu = [["Чоловічі", "Жіночі"], ["На хлопчика", "На дівчинку"], ["Аксесуари"], ["⬅️ Назад"]]
 
+# --- Обробка команд і повідомлень ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = ReplyKeyboardMarkup(main_menu, resize_keyboard=True)
     await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)
@@ -102,6 +98,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 caption=f"{product['name']}\n{product['description']}\nЦіна: {product['price']} грн",
                 reply_markup=reply_markup
             )
+
     elif user_states.get(user_id) == "awaiting_message":
         user_states.pop(user_id, None)
         user = update.effective_user
@@ -111,6 +108,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("Будь ласка, оберіть пункт меню.")
 
+# --- Обробка кнопки "Замовити" ---
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -126,6 +124,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.reply_text("Дякуємо за замовлення! Ми зв'яжемося з вами.")
             break
 
+# --- Запуск бота ---
 if __name__ == '__main__':
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
