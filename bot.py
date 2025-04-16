@@ -3,6 +3,7 @@ import logging
 import os
 import json
 import gspread
+import base64
 from oauth2client.service_account import ServiceAccountCredentials
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
