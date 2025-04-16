@@ -19,13 +19,16 @@ if not os.getenv("GOOGLE_CREDENTIALS"):
     raise ValueError("GOOGLE_CREDENTIALS не встановлено!")
 
 # --- Підключення до Google Sheets ---
-
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-# Отримуємо JSON як рядок і перетворюємо \n
-raw_json = os.environ["GOOGLE_CREDENTIALS"]
-fixed_json = raw_json.replace("\\n", "\n")
-credentials_dict = json.loads(fixed_json)
+# Отримуємо Base64-кодований JSON з змінної середовища
+b64_credentials = os.getenv("GOOGLE_CREDENTIALS_B64")
+if not b64_credentials:
+    raise ValueError("GOOGLE_CREDENTIALS_B64 не встановлено!")
+
+# Декодуємо Base64 та перетворюємо в словник
+credentials_json = base64.b64decode(b64_credentials).decode("utf-8")
+credentials_dict = json.loads(credentials_json)
 
 # Авторизація
 creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
