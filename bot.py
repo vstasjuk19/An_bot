@@ -22,11 +22,17 @@ if not os.getenv("GOOGLE_CREDENTIALS"):
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-# Записуємо JSON в тимчасовий файл
-with open("credentials.json", "w") as f:
-    f.write(os.getenv("GOOGLE_CREDENTIALS"))
+# Отримуємо JSON як текст
+raw_json = os.getenv("GOOGLE_CREDENTIALS")
 
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+# Перетворюємо \\n на справжні \n
+fixed_json = raw_json.replace('\\n', '\n')
+
+# Завантажуємо словник з JSON
+credentials_dict = json.loads(fixed_json)
+
+# Авторизація
+creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 client = gspread.authorize(creds)
 
 # Категорії таблиці на окремих аркушах
