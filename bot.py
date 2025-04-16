@@ -23,9 +23,10 @@ scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 
 # Записуємо JSON у файл, якщо він ще не створений
 if not os.path.exists("credentials.json"):
+    credentials_raw = os.environ["GOOGLE_CREDENTIALS"]
+    credentials_dict = json.loads(credentials_raw)  # Розпарсимо спочатку
     with open("credentials.json", "w") as f:
-        fixed_json = os.environ["GOOGLE_CREDENTIALS"].replace('\\n', '\n')
-        f.write(fixed_json)
+        json.dump(credentials_dict, f)  # Запишемо у валідному форматі
 
 creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
 client = gspread.authorize(creds)
