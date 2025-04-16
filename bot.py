@@ -38,6 +38,23 @@ category_sheets = {
 }
 
 user_states = {}
+async def rows(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet("На дівчинку")
+        all_rows = sheet.get_all_values()
+
+        if len(all_rows) < 2:
+            await update.message.reply_text("Рядків з даними не знайдено.")
+            return
+
+        # Покажемо перші 3 рядки для перевірки
+        response = ""
+        for row in all_rows[0:3]:
+            response += " | ".join(row) + "\n"
+
+        await update.message.reply_text(f"Перші рядки аркуша:\n{response}")
+    except Exception as e:
+        await update.message.reply_text(f"Помилка:\n{e}")
 async def raw(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet("Чоловічі")
@@ -153,6 +170,7 @@ if __name__ == '__main__':
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("raw", raw))
+    app.add_handler(CommandHandler("rows", rows))
     app.add_handler(CommandHandler("debug", debug))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CallbackQueryHandler(button))
