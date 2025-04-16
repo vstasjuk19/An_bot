@@ -107,6 +107,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not products:
             await update.message.reply_text("Категорія наразі пуста.")
             return
+
+        await update.message.reply_text(f"Товари знайдено: {len(products)}")
+        for product in products:
+            await update.message.reply_text(
+                f"{product['name']} – {product['price']} грн"
+            )
         for product in products:
             keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
