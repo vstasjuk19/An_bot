@@ -1,5 +1,6 @@
 import logging
 import os
+import json
 import re
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
@@ -10,10 +11,6 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
 # Підключення до Google Sheets
-import os
-import json
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
