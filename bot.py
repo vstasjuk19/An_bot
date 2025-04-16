@@ -38,6 +38,17 @@ category_sheets = {
 }
 
 user_states = {}
+async def raw(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet("Чоловічі")
+        data = sheet.get_all_records()
+        if not data:
+            await update.message.reply_text("Дані відсутні або не прочитані.")
+            return
+        keys = data[0].keys()
+        await update.message.reply_text("Ключі першого рядка:\n" + "\n".join(keys))
+    except Exception as e:
+        await update.message.reply_text(f"Помилка:\n{e}")
 
 async def debug(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
@@ -135,6 +146,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == '__main__':
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("raw", raw))
     app.add_handler(CommandHandler("debug", debug))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CallbackQueryHandler(button))
