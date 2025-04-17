@@ -165,7 +165,9 @@ elif data.startswith("size_"):
     size = data.split("_")[1]
     await send_order(update, context, size)
 
-async def send_order(update: Update, context: ContextTypes.DEFAULT_TYPE, size=None): user = update.callback_query.from_user product = context.user_data.get("selected_product")
+async def send_order(update: Update, context: ContextTypes.DEFAULT_TYPE, size=None):
+    user = update.callback_query.from_user
+    product = context.user_data.get("selected_product")
 
 if not product:
     await update.callback_query.message.reply_text("Помилка: товар не знайдено.")
