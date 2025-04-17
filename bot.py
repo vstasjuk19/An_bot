@@ -42,18 +42,29 @@ user_states = {}
 # --- Завантаження товарів з аркуша ---
 def load_products(sheet_name):
     try:
+        print(f"DEBUG: Відкриваю аркуш '{sheet_name}'")
         sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet(sheet_name)
         rows = sheet.get_all_values()
+        print(f"DEBUG: Зчитано рядків: {len(rows)}")
+
         if len(rows) < 2:
+            print("DEBUG: Рядків менше 2 — повертаю пусто")
             return []
 
-        headers = [h.strip().replace('\xa0', ' ') for h in rows[0]]  # очищення ключів
+        headers = [h.strip().replace('\xa0', ' ') for h in rows[0]]
+        print(f"DEBUG: Заголовки: {headers}")
+
         products = []
 
-        for row in rows[1:]:
+        for i, row in enumerate(rows[1:], start=2):
+            print(f"DEBUG: Рядок {i}: {row}")
             if len(row) < len(headers):
-                continue  # пропустити неповний рядок
+                print(f"DEBUG: Пропускаю рядок {i} — не повний")
+                continue
+
             data = dict(zip(headers, row))
+            print(f"DEBUG: Сформовано продукт: {data}")
+
             products.append({
                 'id': data.get('ID', ''),
                 'name': data.get('Назва', ''),
@@ -63,9 +74,11 @@ def load_products(sheet_name):
                 'photo': data.get('Фото (URL)', '')
             })
 
+        print(f"DEBUG: Загалом продуктів: {len(products)}")
         return products
+
     except Exception as e:
-        print(f"Error loading sheet {sheet_name}: {e}")
+        print(f"ERROR: Не вдалося завантажити '{sheet_name}': {e}")
         return []
 
 main_menu = [["Каталог"], ["Наші контакти"], ["Зв'язатися з нами"]]
