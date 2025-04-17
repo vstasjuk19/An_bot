@@ -112,8 +112,11 @@ elif user_states.get(user_id) == "awaiting_message":
 else:
     await update.message.reply_text("Будь ласка, оберіть пункт меню.")
 
-async def send_products(update_or_query, context): products = context.user_data.get("products", []) pos = context.user_data.get("position", 0) next_pos = pos + 10 current_batch = products[pos:next_pos]
-
+async def send_products(update_or_query, context):
+    products = context.user_data.get("products", [])
+    pos = context.user_data.get("position", 0)
+    next_pos = pos + 10
+    current_batch = products[pos:next_pos]
 for product in current_batch:
     keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -134,9 +137,10 @@ if next_pos < len(products):
         text="Бажаєте переглянути ще?",
         reply_markup=reply_markup
     )
-
-async def button(update: Update, context: ContextTypes.DEFAULT_TYPE): query = update.callback_query await query.answer() data = query.data
-
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
 if data == "more_products":
     await send_products(query, context)
     return
@@ -181,8 +185,12 @@ message += f"\nКористувач: {user.full_name} (@{user.username})"
 await context.bot.send_message(chat_id=ADMIN_ID, text=message)
 await update.callback_query.message.reply_text("Дякуємо за замовлення! Ми зв'яжемося з вами.")
 
-if name == 'main': app = ApplicationBuilder().token(BOT_TOKEN).build() app.add_handler(CommandHandler("start", start)) app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)) app.add_handler(CallbackQueryHandler(button)) app.run_polling()
-
+if __name__ == '__main__':
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.add_handler(CallbackQueryHandler(button))
+    app.run_polling()
 
 
  
