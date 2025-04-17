@@ -39,7 +39,12 @@ user_states = {}
 main_menu = [["Каталог"], ["Наші контакти"], ["Зв'язатися з нами"]]
 catalog_menu = [["Чоловічі", "Жіночі"], ["На хлопчика", "На дівчинку"], ["Аксесуари"], ["⬅️ Назад"]]
 
-def load_products(sheet_name): try: sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet(sheet_name) rows = sheet.get_all_values() if len(rows) < 2: return []
+def load_products(sheet_name): 
+   try: 
+       sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet(sheet_name)
+       rows = sheet.get_all_values()
+       if len(rows) < 2:
+           return []
 
 headers = [h.strip().replace('\xa0', ' ') for h in rows[0]]
     products = []
