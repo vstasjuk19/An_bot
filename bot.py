@@ -39,33 +39,31 @@ user_states = {}
 main_menu = [["Каталог"], ["Наші контакти"], ["Зв'язатися з нами"]]
 catalog_menu = [["Чоловічі", "Жіночі"], ["На хлопчика", "На дівчинку"], ["Аксесуари"], ["⬅️ Назад"]]
 
-def load_products(sheet_name): 
-   try: 
-       sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet(sheet_name)
-       rows = sheet.get_all_values()
-       if len(rows) < 2:
-           return []
+def load_products(sheet_name):
+    try:
+        sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet(sheet_name)
+        rows = sheet.get_all_values()
+        headers = [h.strip().replace('\xa0', ' ') for h in rows[0]]
+        products = []
 
-headers = [h.strip().replace('\xa0', ' ') for h in rows[0]]
-    products = []
+        for row in rows[1:]:
+            if len(row) < len(headers):
+                continue
+            data = dict(zip(headers, row))
+            products.append({
+                'id': data.get('ID', ''),
+                'name': data.get('Назва', ''),
+                'category': data.get('Категорія', ''),
+                'price': data.get('Ціна', ''),
+                'description': data.get('Опис', ''),
+                'photo': data.get('Фото (URL)', '')
+            })
 
-    for row in rows[1:]:
-        if len(row) < len(headers):
-            continue
-        data = dict(zip(headers, row))
-        products.append({
-            'id': data.get('ID', ''),
-            'name': data.get('Назва', ''),
-            'category': data.get('Категорія', ''),
-            'price': data.get('Ціна', ''),
-            'description': data.get('Опис', ''),
-            'photo': data.get('Фото (URL)', '')
-        })
+        return products
 
-    return products
-except Exception as e:
-    print(f"ERROR: Не вдалося завантажити '{sheet_name}': {e}")
-    return []
+    except Exception as e:
+        print(f"ERROR: Не вдалося завантажити '{sheet_name}': {e}")
+        return []
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE): reply_markup = ReplyKeyboardMarkup(main_menu, resize_keyboard=True) await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)
 
