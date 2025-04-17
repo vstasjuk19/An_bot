@@ -65,10 +65,14 @@ def load_products(sheet_name):
         print(f"ERROR: Не вдалося завантажити '{sheet_name}': {e}")
         return []
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE): reply_markup = ReplyKeyboardMarkup(main_menu, resize_keyboard=True) await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE): text = update.message.text user_id = update.effective_user.id
-
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    reply_markup = ReplyKeyboardMarkup(main_menu, resize_keyboard=True)
+    await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)
+    
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text
+    user_id = update.effective_user.id
+    
 if text == "Каталог":
     reply_markup = ReplyKeyboardMarkup(catalog_menu, resize_keyboard=True)
     await update.message.reply_text("Оберіть категорію з каталогу:", reply_markup=reply_markup)
