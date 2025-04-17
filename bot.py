@@ -133,17 +133,26 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Будь ласка, оберіть пункт меню.")
 
 # Надсилання товарів
+
 async def send_products(update_or_query, context):
     products = context.user_data.get("products", [])
     pos = context.user_data.get("position", 0)
     next_pos = pos + 10
     current_batch = products[pos:next_pos]
 
+    # Визначаємо правильний chat_id
+    if hasattr(update_or_query, "message"):
+        # Якщо це callback_query
+        chat_id = update_or_query.message.chat_id
+    else:
+        # Якщо це звичайне повідомлення
+        chat_id = update_or_query.effective_chat.id
+
     for product in current_batch:
         keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await context.bot.send_photo(
-            chat_id=update_or_query.effective_chat.id,
+            chat_id=chat_id,
             photo=product['photo'],
             caption=f"{product['name']}\n{product['description']}\nЦіна: {product['price']} грн",
             reply_markup=reply_markup
@@ -155,7 +164,7 @@ async def send_products(update_or_query, context):
         keyboard = [[InlineKeyboardButton("Ще товари", callback_data="more_products")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await context.bot.send_message(
-            chat_id=update_or_query.effective_chat.id,
+            chat_id=chat_id,
             text="Бажаєте переглянути ще?",
             reply_markup=reply_markup
         )
