@@ -38,56 +38,32 @@ category_sheets = {
 }
 
 user_states = {}
-async def rows(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet("На дівчинку")
-        all_rows = sheet.get_all_values()
 
-        if len(all_rows) < 2:
-            await update.message.reply_text("Рядків з даними не знайдено.")
-            return
-
-        # Покажемо перші 3 рядки для перевірки
-        response = ""
-        for row in all_rows[0:3]:
-            response += " | ".join(row) + "\n"
-
-        await update.message.reply_text(f"Перші рядки аркуша:\n{response}")
-    except Exception as e:
-        await update.message.reply_text(f"Помилка:\n{e}")
-async def raw(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet("Чоловічі")
-        data = sheet.get_all_records()
-        if not data:
-            await update.message.reply_text("Дані відсутні або не прочитані.")
-            return
-        keys = data[0].keys()
-        await update.message.reply_text("Ключі першого рядка:\n" + "\n".join(keys))
-    except Exception as e:
-        await update.message.reply_text(f"Помилка:\n{e}")
-
-async def debug(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        spreadsheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk")
-        worksheets = spreadsheet.worksheets()
-        sheet_names = [ws.title for ws in worksheets]
-        await update.message.reply_text("Аркуші, які я бачу:\n" + "\n".join(sheet_names))
-    except Exception as e:
-        await update.message.reply_text(f"Помилка підключення до Google Sheets:\n{e}")
-
+# --- Завантаження товарів з аркуша ---
 def load_products(sheet_name):
     try:
         sheet = client.open_by_url("https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk").worksheet(sheet_name)
-        data = sheet.get_all_records()
-        return [{
-            'id': row['ID'],
-            'name': row['Назва'],
-            'category': row['Категорія'],
-            'price': row['Ціна'],
-            'description': row['Опис'],
-            'photo': row['Фото (URL)']
-        } for row in data]
+        rows = sheet.get_all_values()
+        if len(rows) < 2:
+            return []
+
+        headers = [h.strip().replace('\xa0', ' ') for h in rows[0]]  # очищення ключів
+        products = []
+
+        for row in rows[1:]:
+            if len(row) < len(headers):
+                continue  # пропустити неповний рядок
+            data = dict(zip(headers, row))
+            products.append({
+                'id': data.get('ID', ''),
+                'name': data.get('Назва', ''),
+                'category': data.get('Категорія', ''),
+                'price': data.get('Ціна', ''),
+                'description': data.get('Опис', ''),
+                'photo': data.get('Фото (URL)', '')
+            })
+
+        return products
     except Exception as e:
         print(f"Error loading sheet {sheet_name}: {e}")
         return []
@@ -125,11 +101,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Категорія наразі пуста.")
             return
 
-        await update.message.reply_text(f"Товари знайдено: {len(products)}")
-        for product in products:
-            await update.message.reply_text(
-                f"{product['name']} – {product['price']} грн"
-            )
         for product in products:
             keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -169,10 +140,8 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == '__main__':
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("raw", raw))
-    app.add_handler(CommandHandler("rows", rows))
-    app.add_handler(CommandHandler("debug", debug))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CallbackQueryHandler(button))
     app.run_polling()
+
  
