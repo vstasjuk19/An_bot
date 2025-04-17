@@ -30,6 +30,7 @@ client = gspread.authorize(creds)
 
 # Категорії (назви аркушів відповідають назвам вкладок у Google Таблиці)
             
+
 category_sheets = {
     "Чоловічі": "Чоловічі",
     "Жіночі": "Жіночі",
@@ -210,9 +211,8 @@ async def send_order(update: Update, context: ContextTypes.DEFAULT_TYPE, size=No
     await context.bot.send_message(chat_id=ADMIN_ID, text=message)
     await update.callback_query.message.reply_text("Дякуємо за замовлення! Ми зв'яжемося з вами.")
 
-# Головний блок запуску
+# Запуск бота
 if __name__ == "__main__":
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND
-        
+    app.add_handler(MessageHandler(filters.TEXT & ~
