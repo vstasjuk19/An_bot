@@ -29,12 +29,13 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope
 client = gspread.authorize(creds)
 
 # --- Категорії ---
+
 category_sheets = {
-   "Чоловічі": "Men",
-   "Жіночі": "Women",
-   "На хлопчика": "Boys",
-   "На дівчинку": "Girls",
-   "Аксесуари": "Accessories"
+    "Чоловічі": "Чоловічі",
+    "Жіночі": "Жіночі",
+    "На хлопчика": "На хлопчика",
+    "На дівчинку": "На дівчинку",
+    "Аксесуари": "Аксесуари"
 }
 
 user_states = {}
