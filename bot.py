@@ -222,7 +222,7 @@ async def send_order(update: Update, context: ContextTypes.DEFAULT_TYPE, size=No
     await context.bot.send_message(chat_id=ADMIN_ID, text=message)
     await update.callback_query.message.reply_text("Дякуємо за замовлення! Ми зв'яжемося з вами.")
 
-if name == "main":
+if __name__ == "__main__":
     app = ApplicationBuilder().token(BOT_TOKEN).build() 
     app.add_handler(CommandHandler("start", start)) 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
