@@ -183,24 +183,24 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
         products = context.user_data.get("products", [])
         product = next((p for p in products if str(p["id"]) == product_id), None)
 
-    if not product:
-        await query.message.reply_text("Помилка: товар не знайдено.")
-        return
+        if not product:
+            await query.message.reply_text("Помилка: товар не знайдено.")
+            return
 
-    sizes_raw = product.get("sizes_available", "")
-    if sizes_raw.strip().lower() == "відсутні":
-        await query.message.reply_text("Цей товар тимчасово відсутній.")
-        return
+        sizes_raw = product.get("sizes_available", "")
+        if sizes_raw.strip().lower() == "відсутні":
+            await query.message.reply_text("Цей товар тимчасово відсутній.")
+            return
 
-    context.user_data["selected_product"] = product
-    sizes = [s.strip() for s in sizes_raw.split(",") if s.strip()]
+        context.user_data["selected_product"] = product
+        sizes = [s.strip() for s in sizes_raw.split(",") if s.strip()]
 
-    if sizes:
-        buttons = [[InlineKeyboardButton(size, callback_data=f"size_{size}")] for size in sizes]
-        reply_markup = InlineKeyboardMarkup(buttons)
-        await query.message.reply_text("Оберіть розмір:", reply_markup=reply_markup)
-    else:
-        await send_order(update, context, size=None)
+        if sizes:
+            buttons = [[InlineKeyboardButton(size, callback_data=f"size_{size}")] for size in sizes]
+            reply_markup = InlineKeyboardMarkup(buttons)
+            await query.message.reply_text("Оберіть розмір:", reply_markup=reply_markup)
+        else:
+            await send_order(update, context, size=None)
 
     elif data.startswith("size_"):
         size = data.split("_")[1]
