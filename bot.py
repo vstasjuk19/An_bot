@@ -96,19 +96,24 @@ async def send_products(update_or_query, context):
         chat_id = update_or_query.effective_chat.id
 
     for product in current_batch:
-        sizes = product.get("sizes_available", "").strip().lower()
-        is_available = sizes and sizes != "відсутні"
-
-        caption = (
-            f"{product['name']}\n{product['description']}\n"
-            f"Ціна: {product['price']} грн"
-        )
-
-        # Якщо категорія - аксесуари, не показувати розміри
+        # Перевіряємо, чи товар належить до категорії аксесуарів
         if "аксесуар" in product["category"].lower():
-            caption += "\nРозміри не застосовуються до цього товару"
+            # Якщо це аксесуар, не застосовуємо перевірку на розміри
+            caption = (
+                f"{product['name']}\n{product['description']}\n"
+                f"Ціна: {product['price']} грн"
+            )
             reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]])
         else:
+            # Для інших товарів перевіряємо доступні розміри
+            sizes = product.get("sizes_available", "").strip().lower()
+            is_available = sizes and sizes != "відсутні"
+
+            caption = (
+                f"{product['name']}\n{product['description']}\n"
+                f"Ціна: {product['price']} грн"
+            )
+
             if not is_available:
                 caption += "\nТовар тимчасово відсутній"
                 reply_markup = None
@@ -134,6 +139,7 @@ async def send_products(update_or_query, context):
             text="Бажаєте переглянути ще?",
             reply_markup=reply_markup
         )
+        
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE): 
     text = update.message.text
     user_id = update.effective_user.id
