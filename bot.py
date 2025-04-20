@@ -144,29 +144,29 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
             if not is_available:
-            caption += "\nТовар тимчасово відсутній"
-            reply_markup = None
+                caption += "\nТовар тимчасово відсутній"
+                reply_markup = None
             else:
-            caption += f"\nДоступні розміри: {product['sizes_available']}"
-            keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+                caption += f"\nДоступні розміри: {product['sizes_available']}"
+                keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
 
             await context.bot.send_photo(
-            chat_id=chat_id,
-            photo=product['photo'],
-            caption=caption,
-            reply_markup=reply_markup
+                chat_id=chat_id,
+                photo=product['photo'],
+                caption=caption,
+                reply_markup=reply_markup
             )
 
     context.user_data["position"] = next_pos
 
         if next_pos < len(products):
-        keyboard = [[InlineKeyboardButton("Ще товари", callback_data="more_products")]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+            keyboard = [[InlineKeyboardButton("Ще товари", callback_data="more_products")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             await context.bot.send_message(
-            chat_id=chat_id,
-            text="Бажаєте переглянути ще?",
-            reply_markup=reply_markup
+                chat_id=chat_id,
+                text="Бажаєте переглянути ще?",
+                reply_markup=reply_markup
             )
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE): 
