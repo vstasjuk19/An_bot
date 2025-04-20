@@ -122,52 +122,52 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     else:
         await update.message.reply_text("Будь ласка, оберіть пункт меню.")
-        
-async def send_products(update_or_query, context):
+
+    async def send_products(update_or_query, context):
     products = context.user_data.get("products", [])
     pos = context.user_data.get("position", 0) 
     next_pos = pos + 10
     current_batch = products[pos:next_pos]
 
-if hasattr(update_or_query, "message"):
-    chat_id = update_or_query.message.chat_id
-else:
-    chat_id = update_or_query.effective_chat.id
-
-for product in current_batch:
-    sizes = product.get("sizes_available", "").strip().lower()
-    is_available = sizes and sizes != "відсутні"
-
-    caption = (
-        f"{product['name']}\n{product['description']}\n"
-        f"Ціна: {product['price']} грн"
-    )
-
-    if not is_available:
-        caption += "\nТовар тимчасово відсутній"
-        reply_markup = None
+    if hasattr(update_or_query, "message"):
+        chat_id = update_or_query.message.chat_id
     else:
-        caption += f"\nДоступні розміри: {product['sizes_available']}"
-        keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
+        chat_id = update_or_query.effective_chat.id
+
+    for product in current_batch:
+        sizes = product.get("sizes_available", "").strip().lower()
+        is_available = sizes and sizes != "відсутні"
+
+        caption = (
+            f"{product['name']}\n{product['description']}\n"
+            f"Ціна: {product['price']} грн"
+        )
+
+        if not is_available:
+            caption += "\nТовар тимчасово відсутній"
+            reply_markup = None
+        else:
+            caption += f"\nДоступні розміри: {product['sizes_available']}"
+            keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await context.bot.send_photo(
+            chat_id=chat_id,
+            photo=product['photo'],
+            caption=caption,
+            reply_markup=reply_markup
+        )
+
+    context.user_data["position"] = next_pos
+
+    if next_pos < len(products):
+        keyboard = [[InlineKeyboardButton("Ще товари", callback_data="more_products")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await context.bot.send_photo(
-        chat_id=chat_id,
-        photo=product['photo'],
-        caption=caption,
-        reply_markup=reply_markup
-    )
-
-context.user_data["position"] = next_pos
-
-if next_pos < len(products):
-    keyboard = [[InlineKeyboardButton("Ще товари", callback_data="more_products")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await context.bot.send_message(
-        chat_id=chat_id,
-        text="Бажаєте переглянути ще?",
-        reply_markup=reply_markup
-    )
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text="Бажаєте переглянути ще?",
+            reply_markup=reply_markup
+        )
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE): 
     query = update.callback_query 
