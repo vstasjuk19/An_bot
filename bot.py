@@ -86,7 +86,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def send_products(update_or_query, context):
     products = context.user_data.get("products", [])
-    pos = context.user_data.get("position", 0) 
+    pos = context.user_data.get("position", 0)
     next_pos = pos + 10
     current_batch = products[pos:next_pos]
 
@@ -96,31 +96,30 @@ async def send_products(update_or_query, context):
         chat_id = update_or_query.effective_chat.id
 
     for product in current_batch:
-        # Перевіряємо, чи товар належить до категорії аксесуарів
-        if "аксесуар" in product["category"].lower():
-            # Якщо це аксесуар, не застосовуємо перевірку на розміри
-            caption = (
-                f"{product['name']}\n{product['description']}\n"
-                f"Ціна: {product['price']} грн"
+        category = product.get("category", "").strip().lower()
+        sizes = product.get("sizes_available", "").strip().lower()
+
+        is_accessory = "аксесуар" in category
+        is_available = sizes and sizes != "відсутні"
+
+        caption = (
+            f"{product['name']}\n{product['description']}\n"
+            f"Ціна: {product['price']} грн"
+        )
+
+        if is_accessory:
+            # Для аксесуарів не перевіряємо розміри і завжди показуємо кнопку
+            reply_markup = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
             )
-            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]])
+        elif is_available:
+            caption += f"\nДоступні розміри: {product['sizes_available']}"
+            reply_markup = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
+            )
         else:
-            # Для інших товарів перевіряємо доступні розміри
-            sizes = product.get("sizes_available", "").strip().lower()
-            is_available = sizes and sizes != "відсутні"
-
-            caption = (
-                f"{product['name']}\n{product['description']}\n"
-                f"Ціна: {product['price']} грн"
-            )
-
-            if not is_available:
-                caption += "\nТовар тимчасово відсутній"
-                reply_markup = None
-            else:
-                caption += f"\nДоступні розміри: {product['sizes_available']}"
-                keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
+            caption += "\nТовар тимчасово відсутній"
+            reply_markup = None
 
         await context.bot.send_photo(
             chat_id=chat_id,
@@ -139,7 +138,7 @@ async def send_products(update_or_query, context):
             text="Бажаєте переглянути ще?",
             reply_markup=reply_markup
         )
-        
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE): 
     text = update.message.text
     user_id = update.effective_user.id
