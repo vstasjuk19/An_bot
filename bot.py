@@ -3,6 +3,7 @@ import os
 import json 
 import gspread 
 import base64
+import asyncio
 from oauth2client.service_account import ServiceAccountCredentials
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup 
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
@@ -81,16 +82,13 @@ def load_products(sheet_name):
         
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = ReplyKeyboardMarkup(main_menu, resize_keyboard=True)
-    await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)    
-
+    await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)   
 
 async def send_products(update_or_query, context):
     products = context.user_data.get("products", [])
-    pos = context.user_data.get("position", 0)
+    pos = context.user_data.get("position", 0) 
     next_pos = pos + 10
     current_batch = products[pos:next_pos]
-    category = context.user_data.get("category", "").lower()
-    is_accessory = category == "аксесуари"
 
     if hasattr(update_or_query, "message"):
         chat_id = update_or_query.message.chat_id
@@ -99,6 +97,7 @@ async def send_products(update_or_query, context):
 
     for product in current_batch:
         sizes = product.get("sizes_available", "").strip().lower()
+        is_accessory = context.user_data.get("category") == "Аксесуари"
         is_available = is_accessory or (sizes and sizes != "відсутні")
 
         caption = (
@@ -121,6 +120,8 @@ async def send_products(update_or_query, context):
             caption=caption,
             reply_markup=reply_markup
         )
+        
+        await asyncio.sleep(0.5)  # затримка в 0.5 секунди між товарами
 
     context.user_data["position"] = next_pos
 
