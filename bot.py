@@ -174,14 +174,14 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     data = query.data
 
-if data == "more_products":
-    await send_products(query, context)
-    return
+    if data == "more_products":
+        await send_products(query, context)
+        return
 
-elif data.startswith("order_"):
-    product_id = data.split("_")[1]
-    products = context.user_data.get("products", [])
-    product = next((p for p in products if str(p["id"]) == product_id), None)
+    elif data.startswith("order_"):
+        product_id = data.split("_")[1]
+        products = context.user_data.get("products", [])
+        product = next((p for p in products if str(p["id"]) == product_id), None)
 
     if not product:
         await query.message.reply_text("Помилка: товар не знайдено.")
@@ -202,25 +202,25 @@ elif data.startswith("order_"):
     else:
         await send_order(update, context, size=None)
 
-elif data.startswith("size_"):
-    size = data.split("_")[1]
-    await send_order(update, context, size)
+    elif data.startswith("size_"):
+        size = data.split("_")[1]
+        await send_order(update, context, size)
 
 async def send_order(update: Update, context: ContextTypes.DEFAULT_TYPE, size=None):
     user = update.callback_query.from_user
     product = context.user_data.get("selected_product")
 
-if not product:
-    await update.callback_query.message.reply_text("Помилка: товар не знайдено.")
-    return
+    if not product:
+        await update.callback_query.message.reply_text("Помилка: товар не знайдено.")
+        return
 
-message = f"Нове замовлення:\n\nТовар: {product['name']}\nЦіна: {product['price']} грн"
-if size:
-    message += f"\nРозмір: {size}"
-message += f"\nКористувач: {user.full_name} (@{user.username})"
+    message = f"Нове замовлення:\n\nТовар: {product['name']}\nЦіна: {product['price']} грн"
+    if size:
+        message += f"\nРозмір: {size}"
+    message += f"\nКористувач: {user.full_name} (@{user.username})"
 
-await context.bot.send_message(chat_id=ADMIN_ID, text=message)
-await update.callback_query.message.reply_text("Дякуємо за замовлення! Ми зв'яжемося з вами.")
+    await context.bot.send_message(chat_id=ADMIN_ID, text=message)
+    await update.callback_query.message.reply_text("Дякуємо за замовлення! Ми зв'яжемося з вами.")
 
 if name == "main":
     app = ApplicationBuilder().token(BOT_TOKEN).build() 
