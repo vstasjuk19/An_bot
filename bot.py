@@ -79,53 +79,50 @@ def load_products(sheet_name):
         print(f"ERROR: Не вдалося завантажити '{sheet_name}': {e}")
         return []
         
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE): 
-    reply_markup = ReplyKeyboardMarkup(main_menu, resize_keyboard=True)
-    await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)
-
+    
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE): 
     text = update.message.text
     user_id = update.effective_user.id
 
-if text == "Каталог":
-    reply_markup = ReplyKeyboardMarkup(catalog_menu, resize_keyboard=True)
-    await update.message.reply_text("Оберіть категорію з каталогу:", reply_markup=reply_markup)
+    if text == "Каталог":
+        reply_markup = ReplyKeyboardMarkup(catalog_menu, resize_keyboard=True)
+        await update.message.reply_text("Оберіть категорію з каталогу:", reply_markup=reply_markup)
 
-elif text == "Наші контакти":
-    await update.message.reply_text("Телефон: +38066 705 3468\nEmail: vishivanochki@ukr.net")
+    elif text == "Наші контакти":
+        await update.message.reply_text("Телефон: +38066 705 3468\nEmail: vishivanochki@ukr.net")
 
-elif text == "Зв'язатися з нами":
-    user_states[user_id] = "awaiting_message"
-    await update.message.reply_text("Будь ласка, напишіть ваше повідомлення:")
+    elif text == "Зв'язатися з нами":
+        user_states[user_id] = "awaiting_message"
+        await update.message.reply_text("Будь ласка, напишіть ваше повідомлення:")
 
-elif text == "⬅️ Назад":
-    reply_markup = ReplyKeyboardMarkup(main_menu, resize_keyboard=True)
-    await update.message.reply_text("Повертаємось до головного меню:", reply_markup=reply_markup)
+    elif text == "⬅️ Назад":
+        reply_markup = ReplyKeyboardMarkup(main_menu, resize_keyboard=True)
+        await update.message.reply_text("Повертаємось до головного меню:", reply_markup=reply_markup)
 
-elif text in category_sheets:
-    sheet_name = category_sheets[text]
-    products = load_products(sheet_name)
+    elif text in category_sheets:
+        sheet_name = category_sheets[text]
+        products = load_products(sheet_name)
 
-    if not products:
-        await update.message.reply_text("Категорія наразі пуста.")
-        return
+        if not products:
+            await update.message.reply_text("Категорія наразі пуста.")
+            return
 
-    context.user_data["products"] = products
-    context.user_data["position"] = 0
-    context.user_data["category"] = text
+        context.user_data["products"] = products
+        context.user_data["position"] = 0
+        context.user_data["category"] = text
 
-    await send_products(update, context)
+        await send_products(update, context)
 
-elif user_states.get(user_id) == "awaiting_message":
-    user_states.pop(user_id, None)
-    user = update.effective_user
-    message = f"Повідомлення від користувача:\n\n{update.message.text}\n\nІм'я: {user.full_name} (@{user.username})"
-    await context.bot.send_message(chat_id=ADMIN_ID, text=message)
-    await update.message.reply_text("Дякуємо! Ми скоро з вами зв'яжемось.")
+    elif user_states.get(user_id) == "awaiting_message":
+        user_states.pop(user_id, None)
+        user = update.effective_user
+        message = f"Повідомлення від користувача:\n\n{update.message.text}\n\nІм'я: {user.full_name} (@{user.username})"
+        await context.bot.send_message(chat_id=ADMIN_ID, text=message)
+        await update.message.reply_text("Дякуємо! Ми скоро з вами зв'яжемось.")
 
-else:
-    await update.message.reply_text("Будь ласка, оберіть пункт меню.")
-
+    else:
+        await update.message.reply_text("Будь ласка, оберіть пункт меню.")
+        
 async def send_products(update_or_query, context):
     products = context.user_data.get("products", [])
     pos = context.user_data.get("position", 0) 
