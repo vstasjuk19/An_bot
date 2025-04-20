@@ -130,18 +130,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         current_batch = products[pos:next_pos]
 
         if hasattr(update_or_query, "message"):
-        chat_id = update_or_query.message.chat_id
+            chat_id = update_or_query.message.chat_id
         else:
-        chat_id = update_or_query.effective_chat.id
+            chat_id = update_or_query.effective_chat.id
 
         for product in current_batch:
-        sizes = product.get("sizes_available", "").strip().lower()
-        is_available = sizes and sizes != "відсутні"
+            sizes = product.get("sizes_available", "").strip().lower()
+            is_available = sizes and sizes != "відсутні"
 
-        caption = (
+            caption = (
             f"{product['name']}\n{product['description']}\n"
             f"Ціна: {product['price']} грн"
-        )
+            )
 
             if not is_available:
             caption += "\nТовар тимчасово відсутній"
@@ -156,7 +156,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             photo=product['photo'],
             caption=caption,
             reply_markup=reply_markup
-        )
+            )
 
     context.user_data["position"] = next_pos
 
@@ -167,7 +167,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_id=chat_id,
             text="Бажаєте переглянути ще?",
             reply_markup=reply_markup
-        )
+            )
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE): 
     query = update.callback_query 
