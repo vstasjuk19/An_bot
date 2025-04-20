@@ -124,10 +124,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Будь ласка, оберіть пункт меню.")
 
     async def send_products(update_or_query, context):
-    products = context.user_data.get("products", [])
-    pos = context.user_data.get("position", 0) 
-    next_pos = pos + 10
-    current_batch = products[pos:next_pos]
+        products = context.user_data.get("products", [])
+        pos = context.user_data.get("position", 0) 
+        next_pos = pos + 10
+        current_batch = products[pos:next_pos]
 
         if hasattr(update_or_query, "message"):
         chat_id = update_or_query.message.chat_id
