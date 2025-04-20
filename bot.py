@@ -84,7 +84,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)    
 
 
-        async def send_products(update_or_query, context):
+async def send_products(update_or_query, context):
     products = context.user_data.get("products", [])
     pos = context.user_data.get("position", 0)
     next_pos = pos + 10
