@@ -83,6 +83,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = ReplyKeyboardMarkup(main_menu, resize_keyboard=True)
     await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)    
 
+
 async def send_products(update_or_query, context):
     products = context.user_data.get("products", [])
     pos = context.user_data.get("position", 0) 
@@ -93,6 +94,7 @@ async def send_products(update_or_query, context):
         chat_id = update_or_query.message.chat_id
     else:
         chat_id = update_or_query.effective_chat.id
+
     for product in current_batch:
         sizes = product.get("sizes_available", "").strip().lower()
         is_available = sizes and sizes != "відсутні"
@@ -102,20 +104,25 @@ async def send_products(update_or_query, context):
             f"Ціна: {product['price']} грн"
         )
 
-        if not is_available:
-            caption += "\nТовар тимчасово відсутній"
-            reply_markup = None
+        # Якщо категорія - аксесуари, не показувати розміри
+        if "аксесуар" in product["category"].lower():
+            caption += "\nРозміри не застосовуються до цього товару"
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]])
         else:
-            caption += f"\nДоступні розміри: {product['sizes_available']}"
-            keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+            if not is_available:
+                caption += "\nТовар тимчасово відсутній"
+                reply_markup = None
+            else:
+                caption += f"\nДоступні розміри: {product['sizes_available']}"
+                keyboard = [[InlineKeyboardButton("Замовити", callback_data=f"order_{product['id']}")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
 
         await context.bot.send_photo(
             chat_id=chat_id,
             photo=product['photo'],
             caption=caption,
             reply_markup=reply_markup
-         )
+        )
 
     context.user_data["position"] = next_pos
 
