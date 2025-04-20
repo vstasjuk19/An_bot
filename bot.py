@@ -158,7 +158,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=reply_markup
             )
 
-    context.user_data["position"] = next_pos
+        context.user_data["position"] = next_pos
 
         if next_pos < len(products):
             keyboard = [[InlineKeyboardButton("Ще товари", callback_data="more_products")]]
