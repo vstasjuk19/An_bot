@@ -51,7 +51,7 @@ main_menu = [["Каталог"], ["Наші контакти"], ["Зв'язат�
 catalog_menu = [["Чоловічі", "Жіночі"], ["На хлопчика", "На дівчинку"], ["Аксесуари"], ["⬅️ Назад"]]
 
 
-def load_products(sheet_name):
+        def load_products(sheet_name):
     try:
         sheet = client.open_by_url(
             "https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk"
@@ -78,6 +78,10 @@ def load_products(sheet_name):
             })
 
         return products
+
+    except Exception as e:
+        print(f"ERROR: Не вдалося завантажити '{sheet_name}': {e}")
+        return []
 
 def save_new_user(user):
     try:
