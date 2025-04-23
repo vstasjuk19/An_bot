@@ -98,9 +98,6 @@ def save_new_user(user):
     except Exception as e:
         print(f"Помилка при збереженні користувача: {e}")
 
-    except Exception as e:
-        print(f"ERROR: Не вдалося завантажити '{sheet_name}': {e}")
-        return []
         
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
