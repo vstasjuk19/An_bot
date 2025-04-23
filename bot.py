@@ -7,6 +7,8 @@ import asyncio
 from oauth2client.service_account import ServiceAccountCredentials
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup 
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
+from datetime import datetime
+
 
 #--- Змінні середовища ---
 
@@ -34,6 +36,7 @@ category_sheets = {
     "На дівчинку": "На дівчинку", 
     "Аксесуари": "Аксесуари"
 }
+users_sheet_name = "Користувачі"
 
 sizes_by_category = {
     "Чоловічі": ["S", "M", "L", "XL", "XXL", "XXXL","XXXXL"], 
@@ -76,13 +79,37 @@ def load_products(sheet_name):
 
         return products
 
+def save_new_user(user):
+    try:
+        sheet = client.open_by_url(
+            "https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk"
+        ).worksheet("Користувачі")
+
+        users = sheet.get_all_records()
+        user_ids = [str(u.get("user_id")) for u in users]
+
+        if str(user.id) not in user_ids:
+            sheet.append_row([
+                str(user.id),
+                user.full_name,
+                f"@{user.username}" if user.username else "",
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ])
+    except Exception as e:
+        print(f"Помилка при збереженні користувача: {e}")
+
     except Exception as e:
         print(f"ERROR: Не вдалося завантажити '{sheet_name}': {e}")
         return []
         
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    save_new_user(user)
+
     reply_markup = ReplyKeyboardMarkup(main_menu, resize_keyboard=True)
-    await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)   
+    await update.message.reply_text("Вітаємо! Оберіть пункт меню:", reply_markup=reply_markup)
+
 
 async def send_products(update_or_query, context):
     products = context.user_data.get("products", [])
