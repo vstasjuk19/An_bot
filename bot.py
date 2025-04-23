@@ -91,18 +91,21 @@ def save_new_user(user):
         ).worksheet("Користувачі")
 
         users = sheet.get_all_records()
-        user_ids = [str(u.get("ID")) for u in users]
+        user_ids = [str(u.get("ID")) for u in users]  # виправлено
 
         if str(user.id) not in user_ids:
+            print("Новий користувач — додаємо:", user.id)
             sheet.append_row([
                 str(user.id),
                 user.full_name,
                 f"@{user.username}" if user.username else "",
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             ])
+        else:
+            print("Користувач вже існує:", user.id)
+
     except Exception as e:
         print(f"Помилка при збереженні користувача: {e}")
-
         
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
