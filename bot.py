@@ -91,7 +91,7 @@ def save_new_user(user):
         ).worksheet("Користувачі")
 
         users = sheet.get_all_records()
-        user_ids = [str(u.get("user_id")) for u in users]
+        user_ids = [str(u.get("ID")) for u in users]
 
         if str(user.id) not in user_ids:
             sheet.append_row([
