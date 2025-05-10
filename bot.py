@@ -107,6 +107,20 @@ def save_new_user(user):
     except Exception as e:
         print(f"Помилка при збереженні користувача: {e}")
         
+def save_viewed_category(user_id, category):
+    try:
+        sheet = client.open_by_url(
+            "https://docs.google.com/spreadsheets/d/1qPKiXWnsSpPmHGLEwdFyuvk-qBUm_0pW-EicKZXHRmc/edit?usp=drivesdk"
+        ).worksheet("Перегляди")
+
+        sheet.append_row([
+            str(user_id),
+            category,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        ])
+    except Exception as e:
+        print(f"Помилка при збереженні перегляду: {e}")
+        
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -188,6 +202,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text in category_sheets:
         sheet_name = category_sheets[text]
         products = load_products(sheet_name)
+        save_viewed_category(user_id, text)
 
         if not products:
             await update.message.reply_text("Категорія наразі пуста.")
